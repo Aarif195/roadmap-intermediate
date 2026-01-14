@@ -1,5 +1,8 @@
 import { getDb } from "../db.js";
-import { nanoid } from "nanoid";
+import { customAlphabet } from "nanoid";
+
+const alphabet = '3456789abcdefghijkmnopqrstuvwxy';
+const generateShortCode = customAlphabet(alphabet, 6);
 
 // createShortUrl
 export async function createShortUrl(req, res) {
@@ -8,8 +11,16 @@ export async function createShortUrl(req, res) {
         if (!url) return res.status(400).json({ error: "url is required" });
 
         const db = getDb();
-        const shortCode = nanoid(6); // 6 code
         const now = new Date();
+
+
+        let shortCode;
+        let exists = true;
+        while (exists) {
+            shortCode = generateShortCode();
+            const existing = await db.collection("urls").findOne({ shortCode });
+            if (!existing) exists = false;
+        }
 
         // new object to insert
         const newUrl = {
@@ -39,26 +50,12 @@ export async function getOriginalUrl(req, res) {
         const { shortCode } = req.params;
         const db = getDb();
 
-        const urlDoc = await db.collection("urls").findOne({ shortCode });
+        const urlDoc = await db.collection("urls").findOneAndUpdate({ shortCode }, { $inc: { clicks: 1 } });
+
         if (!urlDoc) return res.status(404).json({ error: "Short URL not found" });
 
-        // Optional: increment clicks
-        await db.collection("urls").updateOne(
-            { shortCode },
-            { $inc: { clicks: 1 } }
-        );
+        res.redirect(301, urlDoc.url);
 
-        const updatedDoc = await db.collection("urls").findOne({ shortCode });
-
-        res.json({
-            id: urlDoc._id.toString(),
-            url: urlDoc.url,
-            shortCode: urlDoc.shortCode,
-            createdAt: urlDoc.createdAt,
-            updatedAt: urlDoc.updatedAt,
-            accessCount: updatedDoc.clicks
-
-        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error" });
