@@ -1,11 +1,22 @@
-import { getDb } from "../db.js";
+import { getDb } from "../db";
 import { customAlphabet } from "nanoid";
+import { Request, Response } from "express";
 
-const alphabet = '3456789abcdefghijkmnopqrstuvwxy';
+
+interface UrlDoc {
+  _id?: any;         
+  url: string;
+  shortCode: string;
+  createdAt: Date;
+  updatedAt: Date;
+  clicks?: number;
+}
+
+const alphabet = '3456789abcdefghijkmnpqrstuvwxy';
 const generateShortCode = customAlphabet(alphabet, 6);
 
 // createShortUrl
-export async function createShortUrl(req, res) {
+export async function createShortUrl(req: Request, res: Response) {
     try {
         const { url } = req.body;
         if (!url) return res.status(400).json({ error: "url is required" });
@@ -33,11 +44,13 @@ export async function createShortUrl(req, res) {
         // Insert into MongoDB
         const result = await db.collection("urls").insertOne(newUrl);
 
-        const { _id, ...rest } = newUrl;
-        res.status(201).json({
-            id: result.insertedId.toString(),
-            ...rest
-        });
+       res.status(201).json({
+    id: result.insertedId.toString(), 
+    url: newUrl.url,
+    shortCode: newUrl.shortCode,
+    createdAt: newUrl.createdAt,
+    updatedAt: newUrl.updatedAt
+});
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error" });
@@ -45,7 +58,7 @@ export async function createShortUrl(req, res) {
 }
 
 // getOriginalUrl
-export async function getOriginalUrl(req, res) {
+export async function getOriginalUrl(req: Request, res: Response) {
     try {
         const { shortCode } = req.params;
         const db = getDb();
@@ -63,7 +76,7 @@ export async function getOriginalUrl(req, res) {
 }
 
 // updateShortUrl
-export async function updateShortUrl(req, res) {
+export async function updateShortUrl(req: Request, res: Response) {
     try {
         const { shortCode } = req.params;
         const { url } = req.body;
@@ -102,7 +115,7 @@ export async function updateShortUrl(req, res) {
 }
 
 // deleteShortUrl
-export async function deleteShortUrl(req, res) {
+export async function deleteShortUrl(req: Request, res: Response) {
     try {
         const { shortCode } = req.params;
         const db = getDb();
@@ -121,7 +134,7 @@ export async function deleteShortUrl(req, res) {
 }
 
 // getUrlStats
-export async function getUrlStats(req, res) {
+export async function getUrlStats(req: Request, res: Response) {
     try {
         const { shortCode } = req.params;
         const db = getDb();

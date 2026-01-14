@@ -5,7 +5,8 @@ import {
   updateShortUrl, 
   deleteShortUrl, 
   getUrlStats 
-} from "../controllers/urlController.js";
+} from "../controllers/urlController";
+
 
 const router = express.Router();
 

@@ -1,9 +1,9 @@
-import { connectToMongo } from "./db.js";
+import { connectToMongo } from "./db";
 import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
 
-import urlRoutes from "./routes/urlRoutes.js";
+import urlRoutes from "./routes/urlRoutes";
 
 
 const app = express();
