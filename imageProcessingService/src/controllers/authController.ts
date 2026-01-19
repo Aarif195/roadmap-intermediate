@@ -50,8 +50,8 @@ export async function register(req: Request, res: Response) {
     sendError(res, "Server error");
   }
 }
-
 // LOGIN
+
 export async function login(req: Request, res: Response) {
   try {
     const { email, password }: { email: string; password: string } = req.body;

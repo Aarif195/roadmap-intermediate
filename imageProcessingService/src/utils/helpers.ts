@@ -18,5 +18,5 @@ export function getUsersCollection() {
 
 export function getTasksCollection() {
   const db = getDb();
-  return db.collection("todotasks");
+  return db.collection("imageUpload");
 }

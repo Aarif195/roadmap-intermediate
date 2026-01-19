@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import { connectToMongo } from "./db";
 import authroutes from "./routes/authroutes";
-
+import imageroutes from "./routes/imageroutes";
 
 dotenv.config();
 
@@ -16,6 +16,8 @@ app.get("/", (req: Request, res: Response) => {
 
 
 app.use("/auth", authroutes);
+app.use("/upload", imageroutes);
+
 
 
 connectToMongo();
