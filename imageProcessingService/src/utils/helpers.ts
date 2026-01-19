@@ -16,7 +16,7 @@ export function getUsersCollection() {
   return db.collection<User>("imageOwner");
 }
 
-export function getTasksCollection() {
+export function getImageCollection() {
   const db = getDb();
   return db.collection("imageUpload");
 }

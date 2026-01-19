@@ -16,7 +16,7 @@ app.get("/", (req: Request, res: Response) => {
 
 
 app.use("/auth", authroutes);
-app.use("/upload", imageroutes);
+app.use("/api/images", imageroutes);
 
 
 

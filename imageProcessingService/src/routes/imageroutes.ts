@@ -1,13 +1,15 @@
 import express from "express";
+import { upload } from "../config/cloudinary";
 
 import { authenticate } from "../middleware/authenticate";
 import { sendError } from "../utils/helpers";
 
-import { uploadImageController } from "../controllers/imageContoller";
+import { uploadImage } from "../controllers/imageContoller";
 
 const router = express.Router();
 
-router.post("/image", uploadImageController);
+
+router.post("/upload", authenticate, upload.single("image"), uploadImage);
 
 
 export default router;
