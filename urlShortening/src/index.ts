@@ -5,14 +5,12 @@ dotenv.config();
 
 import urlRoutes from "./routes/urlRoutes";
 
-
 const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
 
-  app.use("/urls", urlRoutes);
-
+app.use("/urls", urlRoutes);
 
 connectToMongo();
 
