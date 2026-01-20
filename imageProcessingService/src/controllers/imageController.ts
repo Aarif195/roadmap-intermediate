@@ -9,7 +9,6 @@ import { AuthRequest } from "../middleware/authenticate";
 
 export async function uploadImage(req: AuthRequest, res: Response) {
   try {
-    
     if (!req.user) return sendError(res, "Unauthorized");
     if (!req.file) return sendError(res, "No file uploaded");
 
@@ -26,6 +25,8 @@ export async function uploadImage(req: AuthRequest, res: Response) {
           publicId: result.public_id,
           url: result.secure_url,
           originalName: req.file?.originalname,
+          mimetype: req.file?.mimetype,
+          size: req.file?.size,
           format: result.format,
           createdAt: new Date(),
         };
@@ -34,7 +35,11 @@ export async function uploadImage(req: AuthRequest, res: Response) {
 
         res.status(201).json({
           message: "Image uploaded successfully",
-          image: { id: dbResult.insertedId, ...newImage },
+          image: {
+            ...newImage,
+            _id: dbResult.insertedId.toString(),
+            userId: req.user?._id ? req.user._id.toString() : "missing_id",
+          },
         });
       },
     );
