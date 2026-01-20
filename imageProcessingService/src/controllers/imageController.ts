@@ -7,6 +7,7 @@ import { ObjectId } from "mongodb";
 import cloudinary from "../config/cloudinary";
 import { AuthRequest } from "../middleware/authenticate";
 
+// uploadImage
 export async function uploadImage(req: AuthRequest, res: Response) {
   try {
     if (!req.user) return sendError(res, "Unauthorized");
@@ -48,5 +49,64 @@ export async function uploadImage(req: AuthRequest, res: Response) {
   } catch (err) {
     console.error(err);
     sendError(res, "Server error during upload");
+  }
+}
+
+// transformImage
+export async function transformImage(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const { transformations } = req.body;
+
+    const imageCol = getImageCollection();
+    const image = await imageCol.findOne({ _id: new ObjectId(id as string) });
+
+    if (!image) return sendError(res, "Image not found");
+
+    // Map the JSON body to Cloudinary transformation options
+    const options: any[] = [];
+
+    // 1. Resize & Crop
+    if (transformations.resize) {
+      options.push({ width: transformations.resize.width, height: transformations.resize.height, crop: "scale" });
+    }
+    if (transformations.crop) {
+      options.push({ width: transformations.crop.width, height: transformations.crop.height, x: transformations.crop.x, y: transformations.crop.y, crop: "crop" });
+    }
+
+  // 2. Rotate, Flip, Mirror
+    if (transformations.rotate) options.push({ angle: transformations.rotate });
+    if (transformations.flip) options.push({ effect: "vflip" });
+    if (transformations.mirror) options.push({ effect: "hflip" });
+
+
+  // 3. Watermark (Using text as simple watermark)
+    if (transformations.watermark) {
+      options.push({ overlay: { font_family: "Arial", font_size: 30, text: transformations.watermark }, gravity: "south_east", opacity: 50 });
+    }
+
+    // 4. Filters & Compression
+    if (transformations.filters?.grayscale) options.push({ effect: "grayscale" });
+    if (transformations.filters?.sepia) options.push({ effect: "sepia" });
+    if (transformations.compress) options.push({ quality: "auto" });
+    
+
+    // Generate the transformed URL
+    const transformedUrl = cloudinary.url(image.publicId, {
+      transformation: options,
+      secure: true,
+      format: transformations.format || image.format
+    });
+
+    res.status(200).json({
+      message: "Transformation applied",
+      originalUrl: image.url,
+      transformedUrl,
+      metadata: {
+        appliedTransformations: transformations
+      }
+    });
+  } catch (err) {
+    sendError(res, "Error transforming image");
   }
 }
